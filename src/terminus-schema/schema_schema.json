@@ -1,0 +1,67 @@
+{ "@type" : "@context",
+  "@schema" : "http://terminusdb.com/schema/sys#",
+  "@base" :  "http://terminusdb.com/schema/sys#",
+  "at" :  "http://terminusdb.com/schema/meta#" }
+
+{ "@id" : "Key",
+  "@type" : "Class" }
+
+{ "@id" : "Lexical",
+  "@type" : "Class",
+  "@inherits" : "Key",
+  "at:fields" : { "@type" : "@list",
+                  "@class" : "xsd:string" } }
+
+{ "@id" : "Hash",
+  "@type" : "Class",
+  "@inherits" : "Key",
+  "at:fields" : { "@type" : "@list",
+                  "@class" : "xsd:string" } }
+
+{ "@id" : "ValueHash",
+  "@type" : "Class",
+  "@inherits" : "Key" }
+
+{ "@id" : "Random",
+  "@type" : "Class",
+  "@inherits" : "Key" }
+
+{ "@id" : "Optional",
+  "@type" : "Class",
+  "at:class" : "Top" }
+
+{ "@id" : "List",
+  "@type" : "Class",
+  "at:class" : "Top" }
+
+{ "@id" : "Set",
+  "@type" : "Class",
+  "at:class" : "Top" }
+
+{ "@id" : "Array",
+  "@type" : "Class",
+  "at:class" : "Top" }
+
+{ "@id" : "Documentation",
+  "@type" : "Class",
+  "at:comment" : "xsd:string",
+  "at:properties" : { "@type" : "Optional",
+                      "@class" : "PropertyDocumentation" } }
+
+{ "@id" : "PropertyDocumentation",
+  "@type" : "Class",
+  "@any" : "xsd:string" }
+
+{ "@id" : "Class",
+  "@type" : "Class",
+  "at:key" : { "@type" : "Optional",
+               "@class" : "Key"},
+  "at:inherits" : { "@type" : "List",
+                    "@class" : "Class" },
+  "at:subdocument" : { "@type" : "Optional",
+                       "@class" : "Unit" },
+  "at:abstract" : { "@type" : "Optional",
+                    "@class" : "Unit" },
+  "at:documentation" : { "@Optional",
+                         "@class" : "Documentation" },
+  "@any" : "Top" }
