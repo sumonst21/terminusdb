@@ -1,7 +1,14 @@
 { "@type" : "@context",
   "@schema" : "http://terminusdb.com/schema/sys#",
   "@base" :  "http://terminusdb.com/schema/sys#",
-  "at" :  "http://terminusdb.com/schema/meta#" }
+  "at" : "http://terminusdb.com/schema/meta#",
+  "xsd" : "http://www.w3.org/2001/XMLSchema#" }
+
+{ "@id" : "@context",
+  "@type" : "Class",
+  "at:schema" : "xsd:string",
+  "at:base" :  "xsd:string",
+  "@any" : "xsd:string" }
 
 { "@id" : "Key",
   "@type" : "Class" }
@@ -55,13 +62,13 @@
 { "@id" : "Class",
   "@type" : "Class",
   "at:key" : { "@type" : "Optional",
-               "@class" : "Key"},
+               "@class" : "Key" },
   "at:inherits" : { "@type" : "List",
                     "@class" : "Class" },
   "at:subdocument" : { "@type" : "Optional",
                        "@class" : "Unit" },
   "at:abstract" : { "@type" : "Optional",
                     "@class" : "Unit" },
-  "at:documentation" : { "@Optional",
+  "at:documentation" : { "@type" : "Optional",
                          "@class" : "Documentation" },
   "@any" : "Top" }

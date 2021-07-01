@@ -53,7 +53,8 @@ is_system_class(Class) :-
             sys:'Class',
             sys:'TaggedUnion',
             sys:'Enum',
-            sys:'Unit'
+            sys:'Unit',
+            sys:'Top'
         ], List),
     memberchk(Class,List).
 
@@ -386,12 +387,22 @@ refute_property(Validation_Object,Class,Witness) :-
     ).
 
 refute_class_or_base_type(Validation_Object,Class,Witness) :-
+    refute_system_class(Class,_Witness0), % needed for schema schema
     refute_base_type(Class,_Witness1),
     refute_class(Validation_Object,Class,_Witness2),
     Witness = witness{
                  '@type': not_a_class_or_base_type,
                   class: Class
               }.
+
+refute_system_class(Class, _Witness) :-
+    is_system_class(Class),
+    !,
+    fail.
+refute_system_class(Class, Witness) :-
+    Witness = witness{ '@type': not_a_system_class,
+                       class: Class }.
+
 
 refute_base_type(Type,_Witness) :-
     is_base_type(Type),

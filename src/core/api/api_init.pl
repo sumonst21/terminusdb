@@ -54,7 +54,9 @@ bootstrap_files :-
     ref_schema_json(RefSchemaPath),
     file_to_predicate(RefSchemaPath, ref_schema),
     woql_schema_json(WOQLSchemaPath),
-    file_to_predicate(WOQLSchemaPath, woql_schema).
+    file_to_predicate(WOQLSchemaPath, woql_schema),
+    schema_schema_json(SchemaSchemaPath),
+    file_to_predicate(SchemaSchemaPath, schema_schema).
 
 template_system_instance_json(Path) :-
     once(expand_file_search_path(ontology('system_instance_template.json'), Path)).
@@ -70,6 +72,9 @@ ref_schema_json(Path) :-
 
 woql_schema_json(Path) :-
     once(expand_file_search_path(ontology('woql.json'), Path)).
+
+schema_schema_json(Path) :-
+    once(expand_file_search_path(ontology('schema_schema.json'), Path)).
 
 config_path(Path) :-
     once(expand_file_search_path(config('terminus_config.pl'), Path)).
@@ -187,5 +192,11 @@ initialize_database_with_store(Key, Store) :-
     woql_schema(WOQL_Schema_String),
     open_string(WOQL_Schema_String, WOQL_Schema_Stream),
     woql_ontology(WOQL_Name),
-    create_graph_from_json(Store,WOQL_Name,WOQL_Schema_Stream,schema,_).
+    create_graph_from_json(Store,WOQL_Name,WOQL_Schema_Stream,schema,_),
+
+    schema_schema(Schema_Schema_String),
+    open_string(Schema_Schema_String, Schema_Schema_Stream),
+    schema_ontology(Schema_Schema_Name),
+    create_graph_from_json(Store,Schema_Schema_Name,Schema_Schema_Stream,schema,_).
+
 

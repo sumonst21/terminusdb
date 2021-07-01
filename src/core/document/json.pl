@@ -1280,6 +1280,9 @@ schema_subject_predicate_object_key_value(DB,Prefixes,Id,P,_,'@documentation',V)
     !,
     documentation_descriptor(DB, Id, Documentation_Desc),
     documentation_descriptor_json(Documentation_Desc,Prefixes,V).
+schema_subject_predicate_object_key_value(_,_,_,'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',_,_,_) :-
+    !,
+    fail.
 schema_subject_predicate_object_key_value(DB,Prefixes,_Id,P,O,K,JSON) :-
     compress_schema_uri(P, Prefixes, K),
     type_descriptor(DB, O, Descriptor),
@@ -1495,7 +1498,7 @@ write_json_stream_to_instance(Transaction, Stream) :-
     [RWO] = (Transaction.instance_objects),
     read_write_obj_builder(RWO, Builder),
 
-    write_json_stream_to_builder(Stream, Builder, schema(Transaction)).
+    write_json_stream_to_builder(Stream, Builder, instance(Transaction)).
 
 write_json_stream_to_instance(Context, Stream) :-
     query_context{transaction_objects: [Transaction]} :< Context,
@@ -4856,3 +4859,124 @@ test(subdocument_deletes_lists, [
     \+ xrdf(Inst, _, _, _).
 
 :- end_tests(arithmetic_document).
+
+:- begin_tests(schema_schema).
+:- use_module(core(util/test_utils)).
+:- use_module(core(query)).
+
+schema6('
+{ "@type" : "@context",
+  "@base" : "http://i/",
+  "@schema" : "http://s/" }
+
+{ "@id" : "NamedExpression",
+  "@type" : "Class",
+  "@key" : { "@type" : "Lexical",
+             "@fields" : ["name"] },
+  "name" : "xsd:string",
+  "expression" : "ArithmeticExpression" }
+
+{ "@id" : "ArithmeticExpression",
+  "@type" : "Class",
+  "@subdocument" : [],
+  "@abstract" : [] }
+
+{ "@id": "Plus",
+  "@type" : "Class",
+  "@inherits" : "ArithmeticExpression",
+  "@key" : { "@type" : "ValueHash" },
+  "left" : "ArithmeticExpression",
+  "right" : "ArithmeticExpression" }
+
+{ "@id" : "Value",
+  "@type" : "Class",
+  "@inherits" : "ArithmeticExpression",
+  "@key" : { "@type" : "ValueHash" },
+  "number" : "xsd:integer" }
+
+{ "@id" : "NamedExpression2",
+  "@type" : "Class",
+  "@key" : { "@type" : "Random" },
+  "name" : "xsd:string",
+  "expression" : "ArithmeticExpression2" }
+
+{ "@id" : "ArithmeticExpression2",
+  "@type" : "Class",
+  "@subdocument" : [],
+  "@abstract" : [] }
+
+{ "@id": "Plus2",
+  "@type" : "Class",
+  "@inherits" : "ArithmeticExpression2",
+  "@key" : { "@type" : "Random" },
+  "left" : "ArithmeticExpression2",
+  "right" : "ArithmeticExpression2" }
+
+{ "@id" : "Value2",
+  "@type" : "Class",
+  "@inherits" : "ArithmeticExpression2",
+  "@key" : { "@type" : "Random" },
+  "number" : "xsd:integer" }
+
+{ "@id" : "Outer",
+  "@type" : "Class",
+  "@key" : { "@type" : "Lexical",
+             "@fields": ["name"] },
+  "name" : "xsd:string",
+  "inner" : "Inner",
+  "number" : "xsd:integer" }
+
+{ "@id" : "Inner",
+  "@type" : "Class",
+  "@subdocument" : [],
+  "@key" : { "@type" : "Random" },
+  "things" : { "@type" : "List",
+               "@class" : "xsd:integer" },
+  "name" : "xsd:string",
+  "number" : "xsd:integer" }
+
+').
+
+create_schema_schema(Descriptor) :-
+    triple_store(Store),
+    schema_ontology(Schema_Schema_Name),
+    create_named_graph(Store, 'test_schema_instance', _),
+
+    Descriptor = label_descriptor{
+                     variety: branch_descriptor,
+                     schema: Schema_Schema_Name,
+                     instance: 'test_schema_instance'
+                 }.
+
+write_instance_schema(Desc) :-
+    create_context(Desc,commit{
+                            author : "me",
+                            message : "none"},
+                   Context),
+
+    schema6(Instance_Schema),
+
+    % Schema
+    with_transaction(
+        Context,
+        write_json_string_to_instance(Context, Instance_Schema),
+        _Meta).
+
+test(elaborate_schema_schema, [
+         setup(
+             (   setup_temp_store(State),
+                 create_schema_schema(Desc),
+                 write_instance_schema(Desc)
+             )),
+         cleanup(
+             teardown_temp_store(State)
+         ),
+         blocked('Schema schema is only conceptual at the moment')
+     ]) :-
+
+    open_descriptor(Desc, DB),
+    get_document(DB, 'Inner', JSON),
+    writeq(JSON).
+
+
+:- end_tests(schema_schema).
