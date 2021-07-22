@@ -4221,130 +4221,130 @@ test_lit(Data, Literal) :-
     load_get_lit(Literal, Data).
 
 test(string) :-
-    test_lit("a string"^^xsd:string, "\"a string\"^^'http://www.w3.org/2001/XMLSchema#string'").
+    test_lit("a string"^^xsd:string, "'http://www.w3.org/2001/XMLSchema#string'^^\"a string\"").
 
 test(boolean_false) :-
-    test_lit(false^^xsd:boolean, "\"false\"^^'http://www.w3.org/2001/XMLSchema#boolean'").
+    test_lit(false^^xsd:boolean, "'http://www.w3.org/2001/XMLSchema#boolean'^^\"false\"").
 
 test(boolean_true) :-
-    test_lit(true^^xsd:boolean, "\"true\"^^'http://www.w3.org/2001/XMLSchema#boolean'").
+    test_lit(true^^xsd:boolean, "'http://www.w3.org/2001/XMLSchema#boolean'^^\"true\"").
 
 test(decimal_pos) :-
     % note that the number saved is not further quoted
-    test_lit(123.456^^xsd:decimal, "123.456^^'http://www.w3.org/2001/XMLSchema#decimal'").
+    test_lit(123.456^^xsd:decimal, "'http://www.w3.org/2001/XMLSchema#decimal'^^123.456").
 
 test(decimal_neg) :-
     % note that the number saved is not further quoted
-    test_lit(-123.456^^xsd:decimal, "-123.456^^'http://www.w3.org/2001/XMLSchema#decimal'").
+    test_lit(-123.456^^xsd:decimal, "'http://www.w3.org/2001/XMLSchema#decimal'^^ -123.456").
 
 test(integer_pos) :-
     % note that the number saved is not further quoted
-    test_lit(42^^xsd:integer, "42^^'http://www.w3.org/2001/XMLSchema#integer'").
+    test_lit(42^^xsd:integer, "'http://www.w3.org/2001/XMLSchema#integer'^^42").
 
 test(integer_neg) :-
     % note that the number saved is not further quoted
-    test_lit(-42^^xsd:integer, "-42^^'http://www.w3.org/2001/XMLSchema#integer'").
+    test_lit(-42^^xsd:integer, "'http://www.w3.org/2001/XMLSchema#integer'^^ -42").
 
 %% NOTE: doubles and floats actually have an alternative notation (2.7E10 etc), as well as special constants(Inf, NaN..), which are not currently supported.
 
 test(double_pos) :-
     % note that the number saved is not further quoted
-    test_lit(123.456^^xsd:double, "123.456^^'http://www.w3.org/2001/XMLSchema#double'").
+    test_lit(123.456^^xsd:double, "'http://www.w3.org/2001/XMLSchema#double'^^123.456").
 
 test(double_neg) :-
     % note that the number saved is not further quoted
-    test_lit(-123.456^^xsd:double, "-123.456^^'http://www.w3.org/2001/XMLSchema#double'").
+    test_lit(-123.456^^xsd:double, "'http://www.w3.org/2001/XMLSchema#double'^^ -123.456").
 
 test(float_pos) :-
     % note that the number saved is not further quoted
-    test_lit(123.456^^xsd:float, "123.456^^'http://www.w3.org/2001/XMLSchema#float'").
+    test_lit(123.456^^xsd:float, "'http://www.w3.org/2001/XMLSchema#float'^^123.456").
 
 test(float_neg) :-
     % note that the number saved is not further quoted
-    test_lit(-123.456^^xsd:float, "-123.456^^'http://www.w3.org/2001/XMLSchema#float'").
+    test_lit(-123.456^^xsd:float, "'http://www.w3.org/2001/XMLSchema#float'^^ -123.456").
 
 test(dateTime) :-
-    test_lit(date_time(2020,01,02,03,04,05)^^xsd:dateTime, "\"2020-01-02T03:04:05Z\"^^'http://www.w3.org/2001/XMLSchema#dateTime'").
+    test_lit(date_time(2020,01,02,03,04,05)^^xsd:dateTime, "'http://www.w3.org/2001/XMLSchema#dateTime'^^\"2020-01-02T03:04:05Z\"").
 
 test(byte_pos) :-
     % note that the number saved is not further quoted
-    test_lit(127^^xsd:byte, "127^^'http://www.w3.org/2001/XMLSchema#byte'").
+    test_lit(127^^xsd:byte, "'http://www.w3.org/2001/XMLSchema#byte'^^127").
 
 test(byte_neg) :-
     % note that the number saved is not further quoted
-    test_lit(-127^^xsd:byte, "-127^^'http://www.w3.org/2001/XMLSchema#byte'").
+    test_lit(-127^^xsd:byte, "'http://www.w3.org/2001/XMLSchema#byte'^^ -127").
 
 test(short_pos) :-
     % note that the number saved is not further quoted
-    test_lit(65535^^xsd:short, "65535^^'http://www.w3.org/2001/XMLSchema#short'").
+    test_lit(65535^^xsd:short, "'http://www.w3.org/2001/XMLSchema#short'^^65535").
 
 test(short_neg) :-
     % note that the number saved is not further quoted
-    test_lit(-65535^^xsd:short, "-65535^^'http://www.w3.org/2001/XMLSchema#short'").
+    test_lit(-65535^^xsd:short, "'http://www.w3.org/2001/XMLSchema#short'^^ -65535").
 
 test(int_pos) :-
     % note that the number saved is not further quoted
-    test_lit(123456^^xsd:int, "123456^^'http://www.w3.org/2001/XMLSchema#int'").
+    test_lit(123456^^xsd:int, "'http://www.w3.org/2001/XMLSchema#int'^^123456").
 
 test(int_neg) :-
     % note that the number saved is not further quoted
-    test_lit(-123456^^xsd:int, "-123456^^'http://www.w3.org/2001/XMLSchema#int'").
+    test_lit(-123456^^xsd:int, "'http://www.w3.org/2001/XMLSchema#int'^^ -123456").
 
 test(long_pos) :-
     % note that the number saved is not further quoted
-    test_lit(123456^^xsd:long, "123456^^'http://www.w3.org/2001/XMLSchema#long'").
+    test_lit(123456^^xsd:long, "'http://www.w3.org/2001/XMLSchema#long'^^123456").
 
 test(long_neg) :-
     % note that the number saved is not further quoted
-    test_lit(-123456^^xsd:long, "-123456^^'http://www.w3.org/2001/XMLSchema#long'").
+    test_lit(-123456^^xsd:long, "'http://www.w3.org/2001/XMLSchema#long'^^ -123456").
 
 test(unsignedByte) :-
     % note that the number saved is not further quoted
-    test_lit(255^^xsd:unsignedByte, "255^^'http://www.w3.org/2001/XMLSchema#unsignedByte'").
+    test_lit(255^^xsd:unsignedByte, "'http://www.w3.org/2001/XMLSchema#unsignedByte'^^255").
 
 test(unsignedShort) :-
     % note that the number saved is not further quoted
-    test_lit(65535^^xsd:unsignedShort, "65535^^'http://www.w3.org/2001/XMLSchema#unsignedShort'").
+    test_lit(65535^^xsd:unsignedShort, "'http://www.w3.org/2001/XMLSchema#unsignedShort'^^65535").
 
 test(unsignedInt) :-
     % note that the number saved is not further quoted
-    test_lit(123456^^xsd:unsignedInt, "123456^^'http://www.w3.org/2001/XMLSchema#unsignedInt'").
+    test_lit(123456^^xsd:unsignedInt, "'http://www.w3.org/2001/XMLSchema#unsignedInt'^^123456").
 
 test(unsignedLong) :-
     % note that the number saved is not further quoted
-    test_lit(123456^^xsd:unsignedLong, "123456^^'http://www.w3.org/2001/XMLSchema#unsignedLong'").
+    test_lit(123456^^xsd:unsignedLong, "'http://www.w3.org/2001/XMLSchema#unsignedLong'^^123456").
 
 test(positiveInteger) :-
     % note that the number saved is not further quoted
-    test_lit(123456^^xsd:positiveInteger, "123456^^'http://www.w3.org/2001/XMLSchema#positiveInteger'").
+    test_lit(123456^^xsd:positiveInteger, "'http://www.w3.org/2001/XMLSchema#positiveInteger'^^123456").
 
 test(nonNegativeInteger) :-
     % note that the number saved is not further quoted
-    test_lit(123456^^xsd:nonNegativeInteger, "123456^^'http://www.w3.org/2001/XMLSchema#nonNegativeInteger'").
+    test_lit(123456^^xsd:nonNegativeInteger, "'http://www.w3.org/2001/XMLSchema#nonNegativeInteger'^^123456").
 
 test(negativeInteger) :-
     % note that the number saved is not further quoted
-    test_lit(-123456^^xsd:negativeInteger, "-123456^^'http://www.w3.org/2001/XMLSchema#negativeInteger'").
+    test_lit(-123456^^xsd:negativeInteger, "'http://www.w3.org/2001/XMLSchema#negativeInteger'^^ -123456").
 
 
 test(nonPositiveInteger) :-
     % note that the number saved is not further quoted
-    test_lit(-123456^^xsd:nonPositiveInteger, "-123456^^'http://www.w3.org/2001/XMLSchema#nonPositiveInteger'").
+    test_lit(-123456^^xsd:nonPositiveInteger, "'http://www.w3.org/2001/XMLSchema#nonPositiveInteger'^^ -123456").
 
 test(hexBinary) :-
-    test_lit("abcd0123"^^xsd:hexBinary, "\"abcd0123\"^^'http://www.w3.org/2001/XMLSchema#hexBinary'").
+    test_lit("abcd0123"^^xsd:hexBinary, "'http://www.w3.org/2001/XMLSchema#hexBinary'^^\"abcd0123\"").
 
 test(base64Binary) :-
-    test_lit("YXNkZg=="^^xsd:base64Binary, "\"YXNkZg==\"^^'http://www.w3.org/2001/XMLSchema#base64Binary'").
+    test_lit("YXNkZg=="^^xsd:base64Binary, "'http://www.w3.org/2001/XMLSchema#base64Binary'^^\"YXNkZg==\"").
 
 test(anyURI) :-
-    test_lit("http://example.org/schema#thing"^^xsd:anyURI, "\"http://example.org/schema#thing\"^^'http://www.w3.org/2001/XMLSchema#anyURI'").
+    test_lit("http://example.org/schema#thing"^^xsd:anyURI, "'http://www.w3.org/2001/XMLSchema#anyURI'^^\"http://example.org/schema#thing\"").
 
 test(language) :-
-    test_lit("en"^^xsd:language, "\"en\"^^'http://www.w3.org/2001/XMLSchema#language'").
+    test_lit("en"^^xsd:language, "'http://www.w3.org/2001/XMLSchema#language'^^\"en\"").
 
 test(language_tagged) :-
-    test_lit("this is an english sentence"@en, "\"this is an english sentence\"@en").
+    test_lit("this is an english sentence"@en, "en@\"this is an english sentence\"").
 
 test(gyear) :-
     test_lit(gyear(2100,0)^^xsd:gYear, "\"2100\"^^'http://www.w3.org/2001/XMLSchema#gYear'").
@@ -4356,39 +4356,39 @@ test(gMonthDay) :-
     test_lit(gmonth_day(05,24,0)^^xsd:gMonthDay, "\"-05-24\"^^'http://www.w3.org/2001/XMLSchema#gMonthDay'").
 
 test(gMonth) :-
-    test_lit(gmonth(05,0)^^xsd:gMonth, "\"--05\"^^'http://www.w3.org/2001/XMLSchema#gMonth'").
+    test_lit(gmonth(05,0)^^xsd:gMonth, "'http://www.w3.org/2001/XMLSchema#gMonth'^^\"--05\"").
 
 test(gDay) :-
-    test_lit(gday(24,0)^^xsd:gDay, "\"---24\"^^'http://www.w3.org/2001/XMLSchema#gDay'").
+    test_lit(gday(24,0)^^xsd:gDay, "'http://www.w3.org/2001/XMLSchema#gDay'^^\"---24\"").
 
 test(time) :-
-    test_lit(time(12,14,0)^^xsd:time, "\"12:14:00Z\"^^'http://www.w3.org/2001/XMLSchema#time'").
+    test_lit(time(12,14,0)^^xsd:time, "'http://www.w3.org/2001/XMLSchema#time'^^\"12:14:00Z\"").
 
 test(date) :-
-    test_lit(date(1978,6,25,0)^^xsd:date, "\"1978-06-25\"^^'http://www.w3.org/2001/XMLSchema#date'").
+    test_lit(date(1978,6,25,0)^^xsd:date, "'http://www.w3.org/2001/XMLSchema#date'^^\"1978-06-25\"").
 
 test(coordinate) :-
-    test_lit(point(1.3,34.3)^^xdd:coordinate, "\"[1.3,34.3]\"^^'http://terminusdb.com/schema/xdd#coordinate'").
+    test_lit(point(1.3,34.3)^^xdd:coordinate, "'http://terminusdb.com/schema/xdd#coordinate'^^\"[1.3,34.3]\"").
 
 test(coordinatePolygon) :-
-    test_lit(coordinate_polygon([[1.3,34.3],[1.3,34.3]])^^xdd:coordinatePolygon, "\"[[1.3,34.3],[1.3,34.3]]\"^^'http://terminusdb.com/schema/xdd#coordinatePolygon'").
+    test_lit(coordinate_polygon([[1.3,34.3],[1.3,34.3]])^^xdd:coordinatePolygon, "'http://terminusdb.com/schema/xdd#coordinatePolygon'^^\"[[1.3,34.3],[1.3,34.3]]\"").
 
 test(coordinatePolyline) :-
-    test_lit(coordinate_polygon([[1.3,34.3],[1.3,34.3]])^^xdd:coordinatePolyline, "\"[[1.3,34.3],[1.3,34.3]]\"^^'http://terminusdb.com/schema/xdd#coordinatePolyline'").
+    test_lit(coordinate_polygon([[1.3,34.3],[1.3,34.3]])^^xdd:coordinatePolyline, "'http://terminusdb.com/schema/xdd#coordinatePolyline'^^\"[[1.3,34.3],[1.3,34.3]]\"").
 
 test(integer_range) :-
-    test_lit(integer_range(1,3)^^xdd:integerRange, "\"[1,3]\"^^'http://terminusdb.com/schema/xdd#integerRange'").
+    test_lit(integer_range(1,3)^^xdd:integerRange, "'http://terminusdb.com/schema/xdd#integerRange'^^\"[1,3]\"").
 
 test(date_range) :-
-    test_lit(date_range(date(2012,02,03,0),date(2012,02,03,0))^^xdd:dateRange, "\"[2012-02-03,2012-02-03]\"^^'http://terminusdb.com/schema/xdd#dateRange'").
+    test_lit(date_range(date(2012,02,03,0),date(2012,02,03,0))^^xdd:dateRange, "'http://terminusdb.com/schema/xdd#dateRange'^^\"[2012-02-03,2012-02-03]\"").
 
 test(gyear_range, []) :-
-    test_lit(gyear_range(gyear(2012,0),gyear(2013,0))^^xdd:gYearRange, "\"[2012,2013]\"^^'http://terminusdb.com/schema/xdd#gYearRange'").
+    test_lit(gyear_range(gyear(2012,0),gyear(2013,0))^^xdd:gYearRange, "'http://terminusdb.com/schema/xdd#gYearRange'^^\"[2012,2013]\"").
 
 test(duration_year) :-
-    test_lit(duration(1,10,0,0,0,0,0)^^xsd:duration, "\"P10Y\"^^'http://www.w3.org/2001/XMLSchema#duration'").
+    test_lit(duration(1,10,0,0,0,0,0)^^xsd:duration, "'http://www.w3.org/2001/XMLSchema#duration'^^\"P10Y\"").
 
 test(duration_hour) :-
-    test_lit(duration(-1,0,0,0,1,0,0)^^xsd:duration, "\"-PT1H\"^^'http://www.w3.org/2001/XMLSchema#duration'").
+    test_lit(duration(-1,0,0,0,1,0,0)^^xsd:duration, "'http://www.w3.org/2001/XMLSchema#duration'^^\"-PT1H\"").
 
 :- end_tests(store_load_data).

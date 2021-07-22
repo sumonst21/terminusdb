@@ -317,15 +317,15 @@ normalise_triple(rdf(X,P,Y),rdf(XF,P,YF)) :-
 
 ground_object_storage(String@Lang, value(S)) :-
     !,
-    format(string(S), '~q@~q', [String,Lang]).
+    format(string(S), '~q@~q', [Lang,String]).
 ground_object_storage(Val^^Type, value(S)) :-
     !,
     (   is_number_type(Type)
-    ->  format(string(S), '~q^^~q', [Val,Type])
+    ->  term_string(Type^^Val, S)
     ;   typecast(Val^^Type, 'http://www.w3.org/2001/XMLSchema#string',
                  [], Cast^^_)
-    ->  format(string(S), '~q^^~q', [Cast,Type])
-    ;   format(string(S), '~q^^~q', [Val,Type])).
+    ->  term_string(Type^^Cast, S)
+    ;   term_string(Type^^Val, S)).
 ground_object_storage(O, node(O)).
 
 /*
@@ -351,11 +351,12 @@ nonvar_literal(Val^^Type, value(S)) :-
     nonvar(Val),
     !,
     (   is_number_type(Type)
-    ->  format(string(S), '~q^^~q', [Val,Type])
+    ->  term_string(Type^^Val, S)
     ;   typecast(Val^^Type, 'http://www.w3.org/2001/XMLSchema#string',
                  [], Cast^^_)
-    ->  format(string(S), '~q^^~q', [Cast,Type])
-    ;   format(string(S), '~q^^~q', [Val,Type])).
+    ->  term_string(Type^^Cast, S)
+    ;   term_string(Type^^Val, S)
+    ).
 nonvar_literal(Val^^Type, _) :-
     once(var(Val) ; var(Type)),
     !.
@@ -416,9 +417,9 @@ storage_literal(X1@L1,X2@L2) :-
  */
 storage_object(value(S),O) :-
     (   term_string(Term,S)
-    ->  (   Term = X^^T
+    ->  (   Term = T^^X
         ->  storage_literal(X^^T,O)
-        ;   Term = X@Lang
+        ;   Term = Lang@X
         ->  storage_literal(X@Lang,O)
         ;   throw(error(storage_unknown_type_error(Term),_)))
     ;   throw(error(storage_bad_value(S),_))).
