@@ -369,6 +369,7 @@ json_elaborate(DB,JSON,Context,Path,JSON_ID) :-
     !,
     do_or_die(get_dict('@type',JSON,Type),
               error(document_has_no_type(JSON), _)),
+    force_value(Type),
     prefix_expand_schema(Type,Context,TypeEx),
 
 
@@ -1114,6 +1115,7 @@ compress_schema_uri(IRI,Prefixes,IRI_Comp) :-
         put_dict(_{'@base' : Schema}, Prefixes, Schema_Prefixes)
     ->  true
     ;   Prefixes = Schema_Prefixes),
+    force_value(IRI),
     compress_dict_uri(IRI,Schema_Prefixes,IRI_Comp),
     !.
 compress_schema_uri(IRI,_Prefixes,IRI).
@@ -1286,6 +1288,7 @@ schema_subject_predicate_object_key_value(DB,Prefixes,Id,P,_,'@inherits',V) :-
     database_schema(DB,Schema),
     findall(Parent,
             (   xrdf(Schema, Id, sys:inherits, O),
+                force_value(O),
                 compress_schema_uri(O, Prefixes, Parent)
             ),
             Parent_List),
@@ -1321,6 +1324,7 @@ schema_subject_predicate_object_key_value(DB,Prefixes,Id,P,_,'@documentation',V)
     documentation_descriptor(DB, Id, Documentation_Desc),
     documentation_descriptor_json(Documentation_Desc,Prefixes,V).
 schema_subject_predicate_object_key_value(DB,Prefixes,_Id,P,O,K,JSON) :-
+    force_value(P),
     compress_schema_uri(P, Prefixes, K),
     type_descriptor(DB, O, Descriptor),
     type_descriptor_json(Descriptor,Prefixes,JSON).
@@ -1391,6 +1395,8 @@ id_schema_json(DB, Prefixes, Id, JSON) :-
         ),
         Data),
     !,
+    force_value(Id_Ex),
+    force_value(Class),
     compress_schema_uri(Id_Ex, Prefixes, Id_Compressed),
     compress_schema_uri(Class, Prefixes, Class_Compressed),
     (   atom_concat('sys:',Small_Class, Class_Compressed)
@@ -1818,6 +1824,7 @@ class_frame(Desc, Class, Frame) :-
     class_frame(Trans, Class, Frame).
 
 class_property_dictionary(Transaction, Prefixes, Class, Frame) :-
+    force_value(Class),
     prefix_expand_schema(Class, Prefixes, Class_Ex),
     findall(
         Predicate_Comp-Result,

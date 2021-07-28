@@ -81,7 +81,7 @@ class_super(Validation_Object,Class,Super) :-
 class_predicate_type(Validation_Object,Class,Predicate,Type) :-
     is_simple_class(Validation_Object,Class),
     database_schema(Validation_Object,Schema),
-    xrdf(Schema,Class,Predicate,Range),
+    xrdf_immediate(Schema,Class,Predicate,Range),
     \+ is_built_in(Predicate),
     do_or_die(
         \+ has_at(Predicate),
@@ -99,7 +99,8 @@ refute_schema_context_prefix(Schema, Prefix, Witness) :-
               }.
 refute_schema_context_prefix(Schema, Prefix, Witness) :-
     (   xrdf(Schema, Prefix, sys:prefix, Prefix_Name)
-    ->  (   Prefix_Name = Prefix_String^^Type,
+    ->  (   force_value(Prefix_Name),
+            Prefix_Name = Prefix_String^^Type,
             Type = 'http://www.w3.org/2001/XMLSchema#string',
             string(Prefix_String)
         ->  fail
@@ -115,7 +116,8 @@ refute_schema_context_prefix(Schema, Prefix, Witness) :-
                   }).
 refute_schema_context_prefix(Schema, Prefix, Witness) :-
     (   xrdf(Schema, Prefix, sys:url, Prefix_Url)
-    ->  (   Prefix_Url = Prefix_Url_String^^Type,
+    ->  (   force_value(Prefix_Url),
+            Prefix_Url = Prefix_Url_String^^Type,
             Type = 'http://www.w3.org/2001/XMLSchema#string',
             string(Prefix_Url_String)
         ->  fail
@@ -184,6 +186,7 @@ refute_schema_context(Validation_Object, Witness) :-
 refute_schema_context(Validation_Object, Witness) :-
     database_schema(Validation_Object, Schema),
     xrdf(Schema, 'terminusdb://context', sys:prefix_pair, Prefix),
+    force_value(Prefix),
     (   atom(Prefix)
     ->  refute_schema_context_prefix(Schema, Prefix, Witness)
     ;   Witness = witness{
@@ -334,12 +337,12 @@ is_key(Type) :-
 
 refute_class_key(Validation_Object,Class,Witness) :-
     database_schema(Validation_Object,Schema),
-    xrdf(Schema, Class, sys:key, Key_Obj),
+    xrdf_immediate(Schema, Class, sys:key, Key_Obj),
     refute_key_obj(Validation_Object,Class,Key_Obj, Witness).
 
 refute_key_obj(Validation_Object,Class,Obj,Witness) :-
     database_schema(Validation_Object,Schema),
-    xrdf(Schema, Obj, rdf:type, Type),
+    xrdf_immediate(Schema, Obj, rdf:type, Type),
     \+ is_key(Type),
     Witness = witness{ '@type' : bad_key_type,
                        class: Class,
@@ -347,10 +350,11 @@ refute_key_obj(Validation_Object,Class,Obj,Witness) :-
                        type: Type }.
 refute_key_obj(Validation_Object,Class,Obj,Witness) :-
     database_schema(Validation_Object,Schema),
-    xrdf(Schema, Obj, rdf:type, Type),
+    xrdf_immediate(Schema, Obj, rdf:type, Type),
     prefix_list([sys:'Lexical', sys:'Hash'], List),
+    force_value(Class),
     memberchk(Type, List),
-    (   xrdf(Schema, Obj, sys:fields, List_Obj)
+    (   xrdf_immediate(Schema, Obj, sys:fields, List_Obj)
     ->  (   rdf_list(Validation_Object,List_Obj,Fields)
         ->  member(Field,Fields),
             \+ class_predicate_type(Validation_Object, Class, Field, _),
@@ -371,7 +375,7 @@ refute_key_obj(Validation_Object,Class,Obj,Witness) :-
 
 refute_class_meta(Validation_Object,Class,Witness) :-
     database_schema(Validation_Object,Schema),
-    xrdf(Schema, Class, sys:abstract, Result),
+    xrdf_immediate(Schema, Class, sys:abstract, Result),
     global_prefix_expand(rdf:nil, RDF_Nil),
     Result \= RDF_Nil,
     Witness = witness{ '@type' : bad_abstract_value,
@@ -379,7 +383,7 @@ refute_class_meta(Validation_Object,Class,Witness) :-
                        value: Result }.
 refute_class_meta(Validation_Object,Class,Witness) :-
     database_schema(Validation_Object,Schema),
-    xrdf(Schema, Class, sys:subdocument, Result),
+    xrdf_immediate(Schema, Class, sys:subdocument, Result),
     global_prefix_expand(rdf:nil, RDF_Nil),
     Result \= RDF_Nil,
     Witness = witness{ '@type' : bad_subdocument_value,
@@ -388,8 +392,8 @@ refute_class_meta(Validation_Object,Class,Witness) :-
 
 refute_property(Validation_Object,Class,Witness) :-
     database_schema(Validation_Object,Schema),
-    xrdf(Schema, Class, rdf:type, sys:'Class'),
-    xrdf(Schema, Class, P, Range),
+    xrdf_immediate(Schema, Class, rdf:type, sys:'Class'),
+    xrdf_immediate(Schema, Class, P, Range),
     \+ is_built_in(P),
     (   is_type_family(Validation_Object, Range)
     ->  refute_type(Validation_Object, Range, Witness)
@@ -525,7 +529,7 @@ type_descriptor(Validation_Object, Class, tagged_union(Class,Map)) :-
     findall(P-C,
             (
                 distinct(P,(
-                             xrdf(Schema, Class, P, C),
+                             xrdf_immediate(Schema, Class, P, C),
                              \+ is_built_in(P)
                          ))
             ),
@@ -535,7 +539,7 @@ type_descriptor(Validation_Object, Class, enum(Class,List)) :-
     is_enum(Validation_Object,Class),
     !,
     database_schema(Validation_Object,Schema),
-    xrdf(Schema, Class, sys:value, Cons),
+    xrdf_immediate(Schema, Class, sys:value, Cons),
     rdf_list(Validation_Object, Cons, List).
 type_descriptor(_Validation_Object, Class, base_class(Class)) :-
     % Not sure these should be conflated...
@@ -547,30 +551,30 @@ type_descriptor(Validation_Object, Class, class(Class)) :-
     !.
 type_descriptor(Validation_Object, Type, set(Class)) :-
     database_schema(Validation_Object, Schema),
-    xrdf(Schema, Type, rdf:type, sys:'Set'),
+    xrdf_immediate(Schema, Type, rdf:type, sys:'Set'),
     !,
-    xrdf(Schema, Type, sys:class, Class).
+    xrdf_immediate(Schema, Type, sys:class, Class).
 type_descriptor(Validation_Object, Type, list(Class)) :-
     database_schema(Validation_Object, Schema),
-    xrdf(Schema, Type, rdf:type, sys:'List'),
+    xrdf_immediate(Schema, Type, rdf:type, sys:'List'),
     !,
-    xrdf(Schema, Type, sys:class, Class).
+    xrdf_immediate(Schema, Type, sys:class, Class).
 type_descriptor(Validation_Object, Type, array(Class)) :-
     database_schema(Validation_Object, Schema),
-    xrdf(Schema, Type, rdf:type, sys:'Array'),
+    xrdf_immediate(Schema, Type, rdf:type, sys:'Array'),
     !,
-    xrdf(Schema, Type, sys:class, Class).
+    xrdf_immediate(Schema, Type, sys:class, Class).
 type_descriptor(Validation_Object, Type, card(Class,N)) :-
     database_schema(Validation_Object, Schema),
-    xrdf(Schema, Type, rdf:type, sys:'Cardinality'),
+    xrdf_immediate(Schema, Type, rdf:type, sys:'Cardinality'),
     !,
-    xrdf(Schema, Type, sys:class, Class),
-    xrdf(Schema, Type, sys:cardinality, N^^xsd:nonNegativeInteger).
+    xrdf_immediate(Schema, Type, sys:class, Class),
+    xrdf_immediate(Schema, Type, sys:cardinality, N^^xsd:nonNegativeInteger).
 type_descriptor(Validation_Object, Type, optional(Class)) :-
     database_schema(Validation_Object, Schema),
-    xrdf(Schema, Type, rdf:type, sys:'Optional'),
+    xrdf_immediate(Schema, Type, rdf:type, sys:'Optional'),
     !,
-    xrdf(Schema, Type, sys:class, Class).
+    xrdf_immediate(Schema, Type, sys:class, Class).
 
 key_base(Validation_Object, _, Type, Base) :-
     database_schema(Validation_Object, Schema),
