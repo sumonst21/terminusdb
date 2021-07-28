@@ -120,7 +120,20 @@
               % upgrade_db.pl
               get_db_version/1,
               set_db_version/1,
-              maybe_upgrade/0
+              maybe_upgrade/0,
+
+              % idmap.pl
+              force_value/1,
+              layer_subjectvar_id/3,
+              layer_predicatevar_id/3,
+              layer_objectvar_id/3,
+              layer_id_subjectvar/3,
+              layer_id_predicatevar/3,
+              layer_id_objectvar/3,
+              register_subject/2,
+              register_predicate/2,
+              register_object/2,
+              value/2
           ]).
 
 :- use_module(triple/base_type).
@@ -133,3 +146,4 @@
 :- use_module(triple/triplestore).
 :- use_module(triple/turtle_utils).
 :- use_module(triple/upgrade_db).
+:- use_module(triple/idmap).

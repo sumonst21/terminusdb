@@ -334,3 +334,22 @@ xrdf_db(Layer,X,Y,Z) :-
     post_convert_node(A,X),
     post_convert_node(B,Y),
     storage_object(S,Z).
+
+
+:- use_module(idmap).
+/* xrdf_fast(Layer, X, Y, Z) is nondet.
+ *
+ * This version uses attributed variables to improve speed.
+ *
+ */
+xrdf_fast(Layer,X,Y,Z) :-
+    register_subject(X,Layer),
+    register_predicate(Y,Layer),
+    register_object(Z,Layer),
+    layer_subjectvar_id(Layer,X,X_Id),
+    layer_predicatevar_id(Layer,Y,Y_Id),
+    layer_objectvar_id(Layer,Z,Z_Id),
+    id_triple(Layer,X_Id,Y_Id,Z_Id),
+    layer_id_subjectvar(Layer,X_Id,X),
+    layer_id_predicatevar(Layer,Y_Id,Y),
+    layer_id_objectvar(Layer,X_Id,Z).
