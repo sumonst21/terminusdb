@@ -94,6 +94,7 @@
               safe_open_named_graph/3,
               safe_delete_named_graph/2,
               xrdf/4,
+              xrdf_immediate/4,
               xquad/5,
               xrdf_db/4,
               xrdf_deleted/4,
@@ -133,7 +134,9 @@
               register_subject/2,
               register_predicate/2,
               register_object/2,
-              value/2
+              value/2,
+              idmap/2,
+              xsdtype/2
           ]).
 
 :- use_module(triple/base_type).

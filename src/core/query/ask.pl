@@ -315,9 +315,14 @@ ask(Askable, Pre_Term, Options) :-
     pre_term_to_term_and_bindings(Query_Context.prefixes,Options,
                                   Pre_Term,Term,
                                   [],Bindings_Out),
-    New_Query_Ctx = Query_Context.put(bindings,Bindings_Out),
-
-    ask_ast(New_Query_Ctx, Term, _).
+    New_Query_Ctx = (Query_Context.put(bindings,Bindings_Out)),
+    ask_ast(New_Query_Ctx, Term, Output_Context),
+    Final_Bindings = (Output_Context.bindings),
+    maplist([Binding]>>(
+                get_dict(woql_var,Binding,Woql_Var),
+                force_value(Woql_Var)
+            ),
+            Final_Bindings).
 
 
 /*

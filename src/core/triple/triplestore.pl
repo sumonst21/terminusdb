@@ -4,6 +4,7 @@
               safe_open_named_graph/3,
               safe_delete_named_graph/2,
               xrdf/4,
+              xrdf_immediate/4,
               xquad/5,
               xrdf_db/4,
               xrdf_deleted/4,
@@ -295,7 +296,22 @@ xrdf(Gs,X,Y,Z) :-
     assertion(is_list(Gs)), % take out for production? This gets called a *lot*
     member(G,Gs),
     read_write_obj_reader(G, Layer),
-    xrdf_db(Layer,X,Y,Z).
+    xrdf_fast(Layer,X,Y,Z).
+
+/**
+ * xrdf_immediate(+Gs,?Subject,?Predicate,?Object) is nondet.
+ *
+ * A version of xrdf that always returns ground results.
+ *
+ */
+xrdf_immediate(Gs,X,Y,Z) :-
+    assertion(is_list(Gs)), % take out for production? This gets called a *lot*
+    member(G,Gs),
+    read_write_obj_reader(G, Layer),
+    xrdf_fast(Layer,X,Y,Z),
+    force_value(X),
+    force_value(Y),
+    force_value(Z).
 
 /**
  * xquad(Gs:list(graph),?G:graph,?Subject,?Predicate,?Object) is nondet.
@@ -352,4 +368,4 @@ xrdf_fast(Layer,X,Y,Z) :-
     id_triple(Layer,X_Id,Y_Id,Z_Id),
     layer_id_subjectvar(Layer,X_Id,X),
     layer_id_predicatevar(Layer,Y_Id,Y),
-    layer_id_objectvar(Layer,X_Id,Z).
+    layer_id_objectvar(Layer,Z_Id,Z).
