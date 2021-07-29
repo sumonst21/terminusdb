@@ -30,6 +30,23 @@ user:goal_expansion(xrdf(G,X,Y,L),xrdf(G,X,Y,Object)) :-
     once(L = _@_ ; L = _^^_),
     literal_expand(L,Object).
 
+% xrdf_immediate/4
+user:goal_expansion(xrdf_immediate(G,A,Y,Z),xrdf_immediate(G,X,Y,Z)) :-
+    nonvar(A),
+    global_prefix_expand(A,X).
+user:goal_expansion(xrdf_immediate(G,X,B,Z),xrdf_immediate(G,X,Y,Z)) :-
+    nonvar(B),
+    global_prefix_expand(B,Y).
+user:goal_expansion(xrdf_immediate(G,X,Y,C),xrdf_immediate(G,X,Y,Z)) :-
+    nonvar(C),
+    C \= _@_,
+    C \= _^^_,
+    global_prefix_expand(C,Z).
+user:goal_expansion(xrdf_immediate(G,X,Y,L),xrdf_immediate(G,X,Y,Object)) :-
+    nonvar(L),
+    once(L = _@_ ; L = _^^_),
+    literal_expand(L,Object).
+
 % delete/5
 user:goal_expansion(delete(G,A,Y,Z,N),delete(G,X,Y,Z,N)) :-
     nonvar(A),
