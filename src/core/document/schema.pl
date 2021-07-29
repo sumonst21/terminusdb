@@ -59,6 +59,7 @@ is_system_class(Class) :-
 is_simple_class(Validation_Object,Class) :-
     database_schema(Validation_Object,Schema),
     xrdf(Schema,Class, rdf:type, C),
+    force_value(C),
     is_system_class(C).
 
 is_base_type(Type) :-
@@ -92,7 +93,7 @@ class_predicate_type(Validation_Object,Class,Predicate,Type) :-
     class_predicate_type(Validation_Object,Super,Predicate,Type).
 
 refute_schema_context_prefix(Schema, Prefix, Witness) :-
-    \+ xrdf(Schema, Prefix, rdf:type, sys:'Prefix'),
+    \+ xrdf_immediate(Schema, Prefix, rdf:type, sys:'Prefix'),
     Witness = witness{
                   '@type': prefix_is_mistyped,
                   prefix: Prefix
@@ -148,14 +149,16 @@ refute_schema_context_prefix(Schema, Prefix, Witness) :-
 
 refute_schema_context(Validation_Object, Witness) :-
     database_schema(Validation_Object, Schema),
-    \+ xrdf(Schema, 'terminusdb://context', rdf:type,sys:'Context'),
-    [Argh] = (Validation_Object.schema_objects),
-    Layer = (Argh.read),
-    forall(terminus_store:triple(Layer, S, P, O),
-           format("t(~q,~q,~q)~n", [S, P, O])),
-    Witness = witness{
-                  '@type': context_not_found
-              }.
+    (   xrdf_immediate(Schema, 'terminusdb://context', rdf:type, sys:'Context')
+    ->  fail
+    ;   %[Argh] = (Validation_Object.schema_objects),
+        %Layer = (Argh.read),
+        %forall(terminus_store:triple(Layer, S, P, O),
+        %       format("t(~q,~q,~q)~n", [S, P, O])),
+        Witness = witness{
+                      '@type': context_not_found
+                  }
+    ).
 refute_schema_context(Validation_Object, Witness) :-
     database_schema(Validation_Object, Schema),
     \+ xrdf(Schema, 'terminusdb://context', sys:base,_),
@@ -223,7 +226,7 @@ is_circular_hasse_diagram(Validation_Object,Witness) :-
 
 subclass_of(Validation_Object,Subclass,Class) :-
     database_schema(Validation_Object,Schema),
-    xrdf(Schema,Subclass,sys:inherits,Class).
+    xrdf_immediate(Schema,Subclass,sys:inherits,Class).
 
 repeats([X|T]) :-
     member(X,T),
@@ -357,6 +360,7 @@ refute_key_obj(Validation_Object,Class,Obj,Witness) :-
     (   xrdf_immediate(Schema, Obj, sys:fields, List_Obj)
     ->  (   rdf_list(Validation_Object,List_Obj,Fields)
         ->  member(Field,Fields),
+            force_value(Field),
             \+ class_predicate_type(Validation_Object, Class, Field, _),
             Witness = witness{ '@type' : key_field_does_not_exist,
                                field: Field,
@@ -462,6 +466,7 @@ rdf_list(Validation_Object,Cell,[First|Rest]) :-
     database_schema(Validation_Object,Schema),
     xrdf(Schema, Cell, rdf:first, First),
     xrdf(Schema, Cell, rdf:rest, Next_Cell),
+    force_value(First),
     rdf_list(Validation_Object, Next_Cell,Rest).
 
 refute_type(Validation_Object,Type,Witness) :-

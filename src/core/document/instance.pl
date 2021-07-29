@@ -104,12 +104,17 @@ member_list(Validation_Object, O, L) :-
 card_count(Validation_Object,S,P,O,N) :-
     % choose as existential anything free
     database_instance(Validation_Object, Instance),
+    force_value(S),
     (   aggregate(count,[S,P,O]^xrdf(Instance,S,P,O),N)
     ->  true
     ;   N = 0).
 
 refute_cardinality_(class(C),Validation_Object,S,P,Witness) :-
     \+ card_count(Validation_Object, S,P,_,1),
+    %% [Argh] = (Validation_Object.instance_objects),
+    %% Layer = (Argh.read),
+    %% forall(terminus_store:triple(Layer, A, B, V),
+    %%        format("t(~q,~q,~q)~n", [A, B, V])),
     Witness = witness{ '@type': instance_not_cardinality_one,
                        instance: S,
                        class: C,
@@ -117,6 +122,14 @@ refute_cardinality_(class(C),Validation_Object,S,P,Witness) :-
                      }.
 refute_cardinality_(base_class(C),Validation_Object,S,P,Witness) :-
     \+ card_count(Validation_Object, S,P,_,1),
+    %% writeq(Validation_Object.instance_objects),
+    %% [Argh] = (Validation_Object.instance_objects),
+    %% Layer = (Argh.read),
+    %% nl,nl,nl,
+    %% writeq(Layer),
+    %% nl,nl,nl,
+    %% forall(terminus_store:triple(Layer, A, B, C),
+    %%        format("t(~q,~q,~q)~n", [A, B, C])),
     Witness = witness{ '@type': instance_not_cardinality_one,
                        instance: S,
                        class: C,
@@ -204,11 +217,14 @@ refute_cardinality(Validation_Object,S,P,C,Witness) :-
     !,
     (   refute_cardinality_(tagged_union(TU,TC),Validation_Object,S,P,Witness)
     ;   class_predicate_type(Validation_Object,C,Q,_),
+        force_value(P),
+        force_value(Q),
         P \= Q,
         refute_cardinality_(not_tagged_union(TU,TC),Validation_Object,S,Q,Witness)
     ).
 refute_cardinality(Validation_Object,S,_,C,Witness) :-
-    class_predicate_type(Validation_Object, C,P,Desc),
+    force_value(C),
+    class_predicate_type(Validation_Object, C, P, Desc),
     refute_cardinality_(Desc,Validation_Object,S,P,Witness).
 
 refute_built_in_value(Validation_Object, rdf:type,O,Witness) :-
@@ -232,8 +248,11 @@ refute_built_in_value(_Validation_Object, rdfs:label,O@L,Witness) :-
 
 subject_changed(Validation_Object, Subject) :-
     database_instance(Validation_Object, Instance),
-    distinct(Subject,(   xrdf_deleted(Instance, Subject,_,_)
-                     ;   xrdf_added(Instance, Subject,_,_))).
+    distinct(Subject,(   xrdf_deleted(Instance, Subject,_,_),
+                         force_value(Subject)
+                     ;   xrdf_added(Instance, Subject,_,_),
+                         force_value(Subject)
+                     )).
 
 subject_inserted(Validation_Object, Subject) :-
     database_instance(Validation_Object, Instance),
@@ -244,7 +263,8 @@ subject_inserted(Validation_Object, Subject) :-
 subject_updated(Validation_Object, Subject) :-
     database_instance(Validation_Object, Instance),
     distinct(Subject,(xrdf_deleted(Instance, Subject,_,_),
-                      xrdf_added(Instance, Subject,_,_))).
+                      xrdf_added(Instance, Subject,_,_),
+                      force_value(Subject))).
 
 subject_deleted(Validation_Object, Subject) :-
     database_instance(Validation_Object, Instance),
@@ -252,13 +272,21 @@ subject_deleted(Validation_Object, Subject) :-
 
 subject_predicate_changed(Validation_Object, Subject,Predicate) :-
     database_instance(Validation_Object, Instance),
-    distinct(Subject-Predicate,(   xrdf_deleted(Instance, Subject,Predicate,_)
-                               ;   xrdf_added(Instance, Subject,Predicate,_))).
+    distinct(Subject-Predicate,(   xrdf_deleted(Instance, Subject,Predicate,_),
+                                   force_value(Subject),
+                                   force_value(Predicate)
+                               ;   xrdf_added(Instance, Subject,Predicate,_),
+                                   force_value(Subject),
+                                   force_value(Predicate)
+                               )).
 
 subject_predicate_updated(Validation_Object, Subject,Predicate) :-
     database_instance(Validation_Object, Instance),
     distinct(Subject-Predicate,(xrdf_deleted(Instance, Subject,Predicate,_),
-                                xrdf_added(Instance, Subject,Predicate,_))).
+                                xrdf_added(Instance, Subject,Predicate,_),
+                                force_value(Subject),
+                                force_value(Predicate)
+                               )).
 
 refute_key(Validation_Object, Subject,Predicate,Class,Witness) :-
     key_descriptor(Validation_Object, Class,Desc),

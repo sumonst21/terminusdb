@@ -1199,10 +1199,10 @@ get_document(DB, Prefixes, Compress, Unfold, Id, Document) :-
 
     prefix_expand(Id,Prefixes,Id_Ex),
 
-    xrdf(Instance, Id_Ex, rdf:type, Class),
+    xrdf_immediate(Instance, Id_Ex, rdf:type, Class),
     findall(
         Prop-Value,
-        (   distinct([P],xrdf(Instance,Id_Ex,P,O)),
+        (   distinct([P],xrdf_immediate(Instance,Id_Ex,P,O)),
             \+ is_built_in(P),
 
             once(class_predicate_type(DB,Class,P,Type)),
