@@ -98,7 +98,9 @@
               xquad/5,
               xrdf_db/4,
               xrdf_deleted/4,
+              xrdf_deleted_immediate/4,
               xrdf_added/4,
+              xrdf_added_immediate/4,
               insert/5,
               delete/5,
               delete_all/1,
@@ -125,16 +127,16 @@
 
               % idmap.pl
               force_value/1,
-              layer_subjectvar_id/3,
-              layer_predicatevar_id/3,
-              layer_objectvar_id/3,
-              layer_id_subjectvar/3,
-              layer_id_predicatevar/3,
-              layer_id_objectvar/3,
-              register_subject/2,
-              register_predicate/2,
-              register_object/2,
-              value/2,
+
+              register_element_id/4,
+              register_layer_subject_id/3,
+              register_layer_predicate_id/3,
+              register_layer_object_id/3,
+
+              subject_value/2,
+              predicate_value/2,
+              object_value/2,
+
               idmap/2,
               xsdtype/2
           ]).

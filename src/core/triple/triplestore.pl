@@ -8,7 +8,9 @@
               xquad/5,
               xrdf_db/4,
               xrdf_deleted/4,
+              xrdf_deleted_immediate/4,
               xrdf_added/4,
+              xrdf_added_immediate/4,
               insert/5,
               delete/5,
               delete_all/1,
@@ -261,13 +263,15 @@ delete_all(G) :-
 xrdf_added(Gs,X,Y,Z) :-
     member(G,Gs),
     read_write_obj_reader(G, Layer),
-    pre_convert_node(X,A),
-    pre_convert_node(Y,B),
-    object_storage(Z,S),
-    triple_addition(Layer,A,B,S),
-    post_convert_node(A,X),
-    post_convert_node(B,Y),
-    storage_object(S,Z).
+    xrdf_added_fast(Layer, X, Y, Z).
+
+xrdf_added_immediate(Gs,X,Y,Z) :-
+    member(G,Gs),
+    read_write_obj_reader(G, Layer),
+    xrdf_added_fast(Layer, X, Y, Z),
+    force_value(X),
+    force_value(Y),
+    force_value(Z).
 
 /*
  * xrdf_deleted(+Gs:list(read_write_obj),+X,+Y,+Z) is nondet.
@@ -277,13 +281,15 @@ xrdf_added(Gs,X,Y,Z) :-
 xrdf_deleted(Gs,X,Y,Z) :-
     member(G,Gs),
     read_write_obj_reader(G, Layer),
-    pre_convert_node(X,A),
-    pre_convert_node(Y,B),
-    object_storage(Z,S),
-    triple_removal(Layer,A,B,S),
-    post_convert_node(A,X),
-    post_convert_node(B,Y),
-    storage_object(S,Z).
+    xrdf_deleted_fast(Layer, X, Y, Z).
+
+xrdf_deleted_immediate(Gs,X,Y,Z) :-
+    member(G,Gs),
+    read_write_obj_reader(G, Layer),
+    xrdf_deleted_fast(Layer, X, Y, Z),
+    force_value(X),
+    force_value(Y),
+    force_value(Z).
 
 /**
  * xrdf(+Gs,?Subject,?Predicate,?Object) is nondet.
@@ -293,7 +299,7 @@ xrdf_deleted(Gs,X,Y,Z) :-
  *
  */
 xrdf(Gs,X,Y,Z) :-
-    assertion(is_list(Gs)), % take out for production? This gets called a *lot*
+    assertion(is_list(Gs)),
     member(G,Gs),
     read_write_obj_reader(G, Layer),
     xrdf_fast(Layer,X,Y,Z).
@@ -304,6 +310,14 @@ xrdf(Gs,X,Y,Z) :-
  * A version of xrdf that always returns ground results.
  *
  */
+/*
+xrdf_immediate(Gs,X,Y,Z) :-
+    assertion(is_list(Gs)),
+    member(G,Gs),
+    read_write_obj_reader(G, Layer),
+    xrdf_db(Layer,X,Y,Z).
+*/
+
 xrdf_immediate(Gs,X,Y,Z) :-
     assertion(is_list(Gs)), % take out for production? This gets called a *lot*
     member(G,Gs),
@@ -359,13 +373,19 @@ xrdf_db(Layer,X,Y,Z) :-
  *
  */
 xrdf_fast(Layer,X,Y,Z) :-
-    register_subject(X,Layer),
-    register_predicate(Y,Layer),
-    register_object(Z,Layer),
-    layer_subjectvar_id(Layer,X,X_Id),
-    layer_predicatevar_id(Layer,Y,Y_Id),
-    layer_objectvar_id(Layer,Z,Z_Id),
-    id_triple(Layer,X_Id,Y_Id,Z_Id),
-    layer_id_subjectvar(Layer,X_Id,X),
-    layer_id_predicatevar(Layer,Y_Id,Y),
-    layer_id_objectvar(Layer,Z_Id,Z).
+    register_layer_subject_id(Layer, X, X_Id),
+    register_layer_predicate_id(Layer, Y, Y_Id),
+    register_layer_object_id(Layer, Z, Z_Id),
+    id_triple(Layer,X_Id,Y_Id,Z_Id).
+
+xrdf_deleted_fast(Layer, S, P, O) :-
+    register_layer_subject_id(Layer, S, S_Id),
+    register_layer_predicate_id(Layer, P, P_Id),
+    register_layer_object_id(Layer, O, O_Id),
+    id_triple_removal(Layer, S_Id, P_Id, O_Id).
+
+xrdf_added_fast(Layer, S, P, O) :-
+    register_layer_subject_id(Layer, S, S_Id),
+    register_layer_predicate_id(Layer, P, P_Id),
+    register_layer_object_id(Layer, O, O_Id),
+    id_triple_addition(Layer, S_Id, P_Id, O_Id).
