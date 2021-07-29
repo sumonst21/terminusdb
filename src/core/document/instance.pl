@@ -289,7 +289,10 @@ subject_predicate_updated(Validation_Object, Subject,Predicate) :-
                                )).
 
 refute_key(Validation_Object, Subject,Predicate,Class,Witness) :-
+    force_value(Class),
     key_descriptor(Validation_Object, Class,Desc),
+    force_value(Subject),
+    force_value(Predicate),
     refute_key_(Desc,Validation_Object,Subject,Predicate,Witness).
 
 refute_key_(lexical(_,Fields),Validation_Object,Subject,Predicate,Witness) :-

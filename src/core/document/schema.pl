@@ -319,6 +319,9 @@ refute_class_documentation(Validation_Object,Class,Witness) :-
                            subject: Doc }
     ;   xrdf(Schema, Doc, sys:properties, Prop_Obj),
         xrdf(Schema, Prop_Obj, Key, Result),
+        force_value(Key),
+        force_value(Class),
+        force_value(Prop_Obj),
         \+ global_prefix_expand(rdf:type, Key),
         global_prefix_expand(xsd:string, XSD),
         (   Result \= _^^XSD
@@ -604,7 +607,7 @@ key_descriptor(Validation_Object, Prefixes, Type, Descriptor) :-
 
 key_descriptor_(Validation_Object, Prefixes, Type, Obj, lexical(Base,Fields)) :-
     database_schema(Validation_Object, Schema),
-    xrdf(Schema, Obj,rdf:type, sys:'Lexical'),
+    xrdf(Schema, Obj, rdf:type, sys:'Lexical'),
     xrdf(Schema, Obj, sys:fields, L),
     rdf_list(Validation_Object,L,Fields),
     key_base(Validation_Object,Prefixes,Type,Base).
@@ -636,7 +639,9 @@ documentation_property_obj(Validation_Object, Obj, Properties) :-
     database_schema(Validation_Object, Schema),
     findall(Key-Value,
             (   xrdf(Schema, Obj, sys:properties, Property),
-                xrdf(Schema, Property, Key, Value^^xsd:string)),
+                xrdf(Schema, Property, Key, Value^^xsd:string),
+                force_value(Key)
+            ),
             Pairs),
     dict_pairs(Properties,json,Pairs).
 

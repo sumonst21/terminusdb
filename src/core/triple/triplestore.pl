@@ -233,8 +233,12 @@ import_graph(_File, _DB_ID, _Graph_ID) :-
  * Insert triple into transaction layer, record changed as 1 or 0
  */
 insert(G,X,Y,Z,Changed) :-
-    ground_object_storage(Z,S),
     read_write_obj_builder(G, Builder),
+    % Should be a cheaper way to do this if we know something exists
+    force_value(X),
+    force_value(Y),
+    force_value(Z),
+    ground_object_storage(Z,S),
     (   nb_add_triple(Builder, X, Y, S)
     ->  Changed = 1
     ;   Changed = 0).
@@ -245,11 +249,23 @@ insert(G,X,Y,Z,Changed) :-
  * Delete quad from transaction predicates, record changed as 1 or 0
  */
 delete(G,X,Y,Z,Changed) :-
-    ground_object_storage(Z,S),
     read_write_obj_builder(G, Builder),
-    (   nb_remove_triple(Builder, X, Y, S)
-    ->  Changed = 1
-    ;   Changed = 0).
+    read_write_obj_reader(G, Layer),
+    (   subject_layer_id(Layer, X, X_Id),
+        predicate_layer_id(Layer, Y, Y_Id),
+        object_layer_id(Layer, Z, Z_Id)
+    ->  (   nb_remove_id_triple(Builder, X_Id, Y_Id, Z_Id)
+        ->  Changed = 1
+        ;   Changed = 0)
+    ;   force_value(X),
+        force_value(Y),
+        force_value(Z),
+        ground_object_storage(Z,S),
+        (   nb_remove_triple(Builder, X, Y, S)
+        ->  Changed = 1
+        ;   Changed = 0
+        )
+    ).
 
 delete_all(G) :-
     forall(xrdf([G], S, P, O),

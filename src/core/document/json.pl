@@ -1011,6 +1011,7 @@ rdf_list_list(_Graph, RDF_Nil,[]) :-
 rdf_list_list(Graph, Cons,[H|L]) :-
     xrdf(Graph, Cons, rdf:type, rdf:'List'),
     xrdf(Graph, Cons, rdf:first, H),
+    force_value(H),
     xrdf(Graph, Cons, rdf:rest, Tail),
     rdf_list_list(Graph,Tail,L).
 
@@ -1021,7 +1022,8 @@ array_list(DB,Id,P,List) :-
         (   xrdf(Instance,Id,P,ArrayElement),
             xrdf(Instance,ArrayElement,rdf:type,sys:'Array'),
             xrdf(Instance,ArrayElement,sys:value,V),
-            xrdf(Instance,ArrayElement,sys:index,I^^_)
+            xrdf(Instance,ArrayElement,sys:index,I^^_),
+            force_value(V)
         ),
         Index_List),
     keysort(Index_List, Index_List_Sorted),
@@ -1048,7 +1050,9 @@ index_list_last_array(Index_List, I, [null|List]) :-
 set_list(DB,Id,P,Set) :-
     % NOTE: This will not give an empty list.
     database_instance(DB,Instance),
-    setof(V,xrdf(Instance,Id,P,V),Set),
+    setof(V,(xrdf(Instance,Id,P,V),
+             force_value(V)),
+          Set),
     !.
 
 list_type_id_predicate_value([],_,_,_,_,_,_,_,_,[]).
@@ -1325,6 +1329,7 @@ schema_subject_predicate_object_key_value(DB,Prefixes,Id,P,_,'@documentation',V)
     documentation_descriptor_json(Documentation_Desc,Prefixes,V).
 schema_subject_predicate_object_key_value(DB,Prefixes,_Id,P,O,K,JSON) :-
     force_value(P),
+    force_value(O),
     compress_schema_uri(P, Prefixes, K),
     type_descriptor(DB, O, Descriptor),
     type_descriptor_json(Descriptor,Prefixes,JSON).
@@ -1381,7 +1386,8 @@ id_schema_json(DB, Id, JSON) :-
 
 id_schema_json(DB, Prefixes, Id, JSON) :-
     database_schema(DB,Schema),
-    (   ground(Id)
+    (   force_value(Id),
+        ground(Id)
     ->  prefix_expand_schema(Id, Prefixes, Id_Ex)
     ;   Id = Id_Ex
     ),
@@ -1390,8 +1396,10 @@ id_schema_json(DB, Prefixes, Id, JSON) :-
 
     findall(
         K-V,
-        (   distinct([P],xrdf(Schema,Id_Ex,P,O)),
-            schema_subject_predicate_object_key_value(DB,Prefixes,Id_Ex,P,O,K,V)
+        (   distinct([P],(xrdf(Schema,Id_Ex,P,O), force_value(P))),
+            schema_subject_predicate_object_key_value(DB,Prefixes,Id_Ex,P,O,K,V),
+            force_value(K),
+            force_value(V)
         ),
         Data),
     !,
@@ -4364,8 +4372,10 @@ test(comment_elaborate,
          'https://s/shape':json{'@id':'http://www.w3.org/2001/XMLSchema#string','@type':"@id"},
          'https://s/species':json{'@id':'http://www.w3.org/2001/XMLSchema#string','@type':"@id"}},
 
+
     open_descriptor(Desc, DB),
     create_context(DB, _{ author : "me", message : "Have you tried bitcoin?" }, Context2),
+
     with_transaction(
         Context2,
         insert_schema_document(Context2, Document),

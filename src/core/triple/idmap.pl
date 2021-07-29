@@ -6,6 +6,10 @@
             register_layer_predicate_id/3,
             register_layer_object_id/3,
 
+            subject_layer_id/3,
+            predicate_layer_id/3,
+            object_layer_id/3,
+
             subject_value/2,
             predicate_value/2,
             object_value/2,
@@ -196,6 +200,21 @@ canonize(String,Atom) :-
     !,
     atom_string(Atom,String).
 canonize(C,C).
+
+type_layer_id(Type,X,Layer,Id) :-
+    get_attr(X, idmap_map, IDMap),
+    layer_to_id(Layer, Layer_Id),
+    type_idspace(Type,Id_Space),
+    memberchk([Layer_Id-_-Id_Space-Id], IDMap).
+
+subject_layer_id(X,Layer,Id) :-
+    type_layer_id(subject, X, Layer, Id).
+
+predicate_layer_id(X,Layer,Id) :-
+    type_layer_id(predicate, X, Layer, Id).
+
+object_layer_id(X,Layer,Id) :-
+    type_layer_id(object, X, Layer, Id).
 
 register_subject(X,Layer) :-
     register_value_in_idmap(subject,X,Layer).

@@ -133,6 +133,10 @@
               register_layer_predicate_id/3,
               register_layer_object_id/3,
 
+              subject_layer_id/3,
+              predicate_layer_id/3,
+              object_layer_id/3,
+
               subject_value/2,
               predicate_value/2,
               object_value/2,
