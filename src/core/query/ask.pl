@@ -320,7 +320,7 @@ ask(Askable, Pre_Term, Options) :-
     Final_Bindings = (Output_Context.bindings),
     maplist([Binding]>>(
                 get_dict(woql_var,Binding,Woql_Var),
-                force_value(Woql_Var)
+                ignore(force_value(Woql_Var))
             ),
             Final_Bindings).
 

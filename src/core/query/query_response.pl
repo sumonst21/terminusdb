@@ -11,6 +11,7 @@
 :- use_module(core(util)).
 :- use_module(core(transaction)).
 :- use_module(core(triple/literals)).
+:- use_module(core(triple/idmap)).
 
 /** <module> Query Response
  *
@@ -49,10 +50,11 @@ json_transform_binding_set(Context, Binding, JSON) :-
     Prefixes = (Context.prefixes),
     maplist({Prefixes}/[Record,Var_Name=Term]>>(
                 get_dict(var_name, Record, Var_Name),
-                get_dict(woql_var, Record, Prolog_Var),
-                (   var(Prolog_Var)
+                get_dict(woql_var, Record, WOQL_Var),
+                ignore(force_value(WOQL_Var)),
+                (   var(WOQL_Var)
                 ->  Term = "system:unknown"
-                ;   term_jsonld(Prolog_Var, Prefixes, Term))),
+                ;   term_jsonld(WOQL_Var, Prefixes, Term))),
             Binding,
             Data),
     dict_create(JSON, _, Data).

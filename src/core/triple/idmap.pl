@@ -31,9 +31,9 @@ register_element_id(Type, Layer, X, Id) :-
         ;   Result = S),
         type_id(Type,Layer,Result,Id)
     ;   Type = object,
-        (   Value = _^^_
-        ;   Value = _@_)
-    ->  object_storage(Value, Result),
+        (   X = _^^_
+        ;   X = _@_)
+    ->  object_storage(X, Result),
         type_id(Type,Layer,Result,Id)
     ).
 register_element_id(Type,Layer,X,Id) :-
@@ -412,6 +412,40 @@ test(register_literals, []) :-
               force_value(Z),
               Z = "A variable or node."^^'http://www.w3.org/2001/XMLSchema#string'
           ),
+
+    true.
+
+test(fail_literals, []) :-
+    woql_ontology(WOQL),
+    triple_store(Store),
+    safe_open_named_graph(Store,WOQL,Graph),
+    head(Graph, Layer),
+
+    subject_value(X, 'http://terminusdb.com/schema/woql#ArithmeticValue_Documentation'),
+    get_attr(X, idmap_value, X_Val),
+    X_Val = "http://terminusdb.com/schema/woql#ArithmeticValue_Documentation",
+    % don't leave a binding...
+    \+ \+ X = 'http://terminusdb.com/schema/woql#ArithmeticValue_Documentation',
+
+    register_layer_subject_id(Layer, X, X_Id),
+
+    \+ (   Z = _^^_,
+           register_layer_object_id(Layer, Z, Z_Id),
+           writeq(here),nl,
+           id_triple(Layer, X_Id, _, Z_Id),
+           writeq(here),nl,
+           force_value(Z),
+           write('Z: '),
+           Z = "X"^^'http://www.w3.org/2001/XMLSchema#string'
+       ),
+
+    \+ (   Z = "X"^^'http://www.w3.org/2001/XMLSchema#string',
+           register_layer_object_id(Layer, Z, Z_Id),
+           writeq(here),nl,
+           id_triple(Layer, X_Id, _, Z_Id),
+           writeq(here),nl,
+           force_value(Z)
+       ),
 
     true.
 

@@ -1523,11 +1523,19 @@ compile_wf(dot(Dict,Key,Value), get_dict(KeyE,DictE,ValueE)) -->
 compile_wf(group_by(WGroup,WTemplate,WQuery,WAcc),group_by(Group,Template,Query,Acc)) -->
     resolve(WGroup,Group),
     resolve(WTemplate,Template),
-    compile_wf(WQuery, Query),
+    compile_wf(WQuery, Sub_Query),
+    { term_variables(Group, Group_Vars),
+      term_variables(Template, Template_Vars),
+      append(Group_Vars, Template_Vars, Vars),
+      Post_Term = maplist([Var]>>ignore(force_value(Var)), Vars),
+      Query = (Sub_Query,Post_Term) },
     resolve(WAcc,Acc).
 compile_wf(distinct(X,WQuery), distinct(XE,Query)) -->
     resolve(X,XE),
-    compile_wf(WQuery,Query).
+    compile_wf(WQuery,Query),
+    { term_variables(XE, Vars),
+      Post_Term = maplist([Var]>>ignore(force_value(Var)), Vars),
+      Query = (Sub_Query,Post_Term) }.
 compile_wf(length(L,N),Length) -->
     resolve(L,LE),
     resolve(N,NE),

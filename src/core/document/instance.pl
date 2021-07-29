@@ -418,6 +418,7 @@ refute_abstract(Subject, Class, Witness) :-
               }.
 
 refute_typed_subject(Validation_Object,Subject,Class,Witness) :-
+    force_value(Class),
     subject_predicate_changed(Validation_Object,Subject,Predicate),
     % We also need to check arrays / lists for coherence here?
     (   is_built_in(Predicate)
