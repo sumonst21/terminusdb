@@ -55,18 +55,19 @@ is_instance(_Validation_Object, Literal, T) :-
     !.
 is_instance(Validation_Object, X, C) :-
     database_instance(Validation_Object, Instance),
-    xrdf(Instance, X, rdf:type, Class),
+    xrdf_immediate(Instance, X, rdf:type, Class),
     is_simple_class(Validation_Object, Class),
     class_subsumed(Validation_Object, Class, C).
 % NOTE: Need a clause here for enumerated types!
 is_instance(Validation_Object, X, C) :-
+    force_value(C),
     ground(C),
     is_enum(Validation_Object, C),
     !,
     % This would be faster with set or even array!
     % probably also faster to use the database!
     database_schema(Validation_Object, Schema),
-    xrdf(Schema, C, sys:value, Cons),
+    xrdf_immediate(Schema, C, sys:value, Cons),
     graph_member_list(Schema, X, Cons).
 
 is_instance2(Validation_Object, X, C) :-
@@ -92,7 +93,8 @@ array_object(Validation_Object, S,I,O) :-
             [t(S,object,O)]).
 
 graph_member_list(Instance, O,L) :-
-    xrdf(Instance, L, rdf:first, O).
+    xrdf(Instance, L, rdf:first, O),
+    force_value(O).
 graph_member_list(Instance, O,L) :-
     xrdf(Instance, L, rdf:rest, Cdr),
     graph_member_list(Instance,O,Cdr).

@@ -1601,15 +1601,15 @@ delete_subdocument(DB, Prefixes, V) :-
     ;   true).
 
 delete_document(DB, Prefixes, Id) :-
-    database_instance(DB,Instance),
+    database_instance(DB,[Instance]),
     prefix_expand(Id,Prefixes,Id_Ex),
-    (   xrdf(Instance, Id_Ex, rdf:type, _)
+    (   xrdf([Instance], Id_Ex, rdf:type, _)
     ->  true
     ;   throw(error(document_does_not_exist(Id),_))
     ),
     forall(
-        xquad(Instance, G, Id_Ex, P, V),
-        (   delete(G, Id_Ex, P, V, _),
+        xrdf_immediate([Instance], Id_Ex, P, V),
+        (   delete(Instance, Id_Ex, P, V, _),
             delete_subdocument(DB,Prefixes,V)
         )
     ).

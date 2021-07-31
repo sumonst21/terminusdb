@@ -235,9 +235,10 @@ import_graph(_File, _DB_ID, _Graph_ID) :-
 insert(G,X,Y,Z,Changed) :-
     read_write_obj_builder(G, Builder),
     % Should be a cheaper way to do this if we know something exists
-    force_value(X),
-    force_value(Y),
-    force_value(Z),
+    do_or_die((force_value(X),
+               force_value(Y),
+               force_value(Z)),
+              error(instantiation_error, _)),
     ground_object_storage(Z,S),
     (   nb_add_triple(Builder, X, Y, S)
     ->  Changed = 1

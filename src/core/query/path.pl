@@ -1,5 +1,6 @@
 :- module(path,[
               compile_pattern/4,
+              calculate_path_solutions/5,
               calculate_path_solutions/6
           ]).
 
@@ -13,8 +14,22 @@ hop(type_filter{ types : Types}, X, P, Y, Transaction_Object) :-
     memberchk(schema,Types),
     xrdf(Transaction_Object.schema_objects, X, P, Y).
 
+force_path([]).
+force_path([Edge|T]) :-
+    get_dict('http://terminusdb.com/schema/woql#subject', Edge, X),
+    force_value(X),
+    get_dict('http://terminusdb.com/schema/woql#predicate', Edge, P),
+    force_value(P),
+    get_dict('http://terminusdb.com/schema/woql#object', Edge, Y),
+    force_value(Y),
+    force_path(T).
+
 calculate_path_solutions(Pattern,XE,YE,Path,Filter,Transaction_Object) :-
-    run_pattern(Pattern,XE,YE,Path,Filter,Transaction_Object).
+    run_pattern(Pattern,XE,YE,Path,Filter,Transaction_Object),
+    force_path(Path).
+
+calculate_path_solutions(Pattern,XE,YE,Filter,Transaction_Object) :-
+    run_pattern(Pattern,XE,YE,_Path,Filter,Transaction_Object).
 
 /**
  * in_open_set(+Elt,+Set) is semidet.
@@ -205,6 +220,7 @@ test(n_m, [
 
     create_context(Descriptor,Commit_Info, Context2),
     query_response:run_context_ast_jsonld_response(Context2, AST2, Result),
+
     get_dict(bindings,Result,Bindings),
     length(Bindings, 3).
 

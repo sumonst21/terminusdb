@@ -389,12 +389,9 @@ test(register_literals, []) :-
 
     \+ \+ (   Z = _^^_,
               register_layer_object_id(Layer, Z, Z_Id),
-              writeq(here),nl,
+
               id_triple(Layer, X_Id, Y_Id, Z_Id),
-              writeq(here),nl,
               force_value(Z),
-              write('Z: '),
-              writeq(Z),nl,
               Z = "A variable or node."^^'http://www.w3.org/2001/XMLSchema#string'
           ),
 
@@ -431,19 +428,14 @@ test(fail_literals, []) :-
 
     \+ (   Z = _^^_,
            register_layer_object_id(Layer, Z, Z_Id),
-           writeq(here),nl,
            id_triple(Layer, X_Id, _, Z_Id),
-           writeq(here),nl,
            force_value(Z),
-           write('Z: '),
            Z = "X"^^'http://www.w3.org/2001/XMLSchema#string'
        ),
 
     \+ (   Z = "X"^^'http://www.w3.org/2001/XMLSchema#string',
            register_layer_object_id(Layer, Z, Z_Id),
-           writeq(here),nl,
            id_triple(Layer, X_Id, _, Z_Id),
-           writeq(here),nl,
            force_value(Z)
        ),
 

@@ -73,6 +73,7 @@
 
               % path.pl
               compile_pattern/4,
+              calculate_path_solutions/5,
               calculate_path_solutions/6,
 
               % metadata.pl

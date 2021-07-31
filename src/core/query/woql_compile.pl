@@ -1156,7 +1156,8 @@ compile_wf(isa(X,C),is_instance(Transaction_Object,XE,CE)) -->
     view(transaction_objects, Transaction_Objects),
     {
         collection_descriptor_transaction_object(Collection_Descriptor,Transaction_Objects,
-                                                 Transaction_Object)
+                                                 Transaction_Object),
+        * _Force_Query = (ignore(force_value(XE)),ignore(force_value(CE)))
     }.
 compile_wf(A << B,(distinct([AE,BE], class_subsumed(Transaction_Object,AE,BE)))) -->
     resolve(A,AE),
@@ -1232,7 +1233,21 @@ compile_wf(t(X,P,Y,G),Goal) -->
     compile_wf(t(X,P,Y), Goal),
     update(filter, _Filter, Old_Filter).
 compile_wf(path(X,Pattern,Y),Goal) -->
-    compile_wf(path(X,Pattern,Y,_),Goal).
+    resolve(X,XE),
+    resolve(Y,YE),
+    view(default_collection, Collection_Descriptor),
+    view(transaction_objects, Transaction_Objects),
+    view(filter, Filter),
+    view(prefixes,Prefixes),
+    {
+        collection_descriptor_transaction_object(Collection_Descriptor,Transaction_Objects,
+                                                 Transaction_Object),
+        filter_transaction(Filter, Transaction_Object, New_Transaction_Object),
+        (   compile_pattern(Pattern,Compiled_Pattern,Prefixes,New_Transaction_Object)
+        ->  true
+        ;   throw(error(woql_syntax_error(bad_path_pattern(Pattern)),_))),
+        Goal = calculate_path_solutions(Compiled_Pattern,XE,YE,Filter,New_Transaction_Object)
+    }.
 compile_wf(path(X,Pattern,Y,Path),Goal) -->
     resolve(X,XE),
     resolve(Y,YE),
@@ -1532,7 +1547,7 @@ compile_wf(group_by(WGroup,WTemplate,WQuery,WAcc),group_by(Group,Template,Query,
     resolve(WAcc,Acc).
 compile_wf(distinct(X,WQuery), distinct(XE,Query)) -->
     resolve(X,XE),
-    compile_wf(WQuery,Query),
+    compile_wf(WQuery,Sub_Query),
     { term_variables(XE, Vars),
       Post_Term = maplist([Var]>>ignore(force_value(Var)), Vars),
       Query = (Sub_Query,Post_Term) }.
@@ -1614,7 +1629,7 @@ compile_wf(triple_count(Path,Count),Goal) -->
     }.
 compile_wf(debug_log(Format_String, Arguments), http_log(Format_String, ArgumentsE)) -->
     resolve(Arguments, ArgumentsE).
-compile_wf(typeof(X,T), typeof(XE,TE)) -->
+compile_wf(typeof(X,T), (ignore(force_value(XE)), ignore(force_value(TE)), typeof(XE,TE))) -->
     resolve(X,XE),
     resolve(T,TE).
 compile_wf(false,false) -->
@@ -4038,6 +4053,7 @@ test(typeof, [
                           variable : "X"}}]},
 
     query_test_response(system_descriptor{}, Query, JSON),
+    writeq(JSON.bindings),
     [Result] = (JSON.bindings),
     Result.'Type' = 'xsd:string'.
 
@@ -4320,12 +4336,13 @@ load_get_lit(Literal, Data) :-
             read_write_obj_builder(RWO, Builder),
 
             with_transaction(Context,
-                             nb_add_triple(Builder, "a", "b", value(Literal)),
+                             nb_add_triple(Builder,
+                                           "http://somewhere.for.now/document/a",
+                                           "http://somewhere.for.now/schema#b", value(Literal)),
                              _),
 
             once(ask(Descriptor,
-                     t("a", "b", Data)))
-
+                     t(a,b,Data)))
         ),
         teardown_temp_store(State)).
 
