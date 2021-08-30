@@ -4482,6 +4482,33 @@ test(jobs_group_by, [
                                json{'@type':'xsd:string','@value':"quux"}],
        'TheCount':json{'@type':'xsd:decimal','@value':2}}] = (Response.bindings).
 
+
+test(less_than, [
+         setup((setup_temp_store(State),
+                create_db_with_test_schema("admin", "test"))),
+         cleanup(teardown_temp_store(State))
+     ]) :-
+    resolve_absolute_string_descriptor("admin/test", Descriptor),
+
+    get_time(X),
+    AST = using('_commits',
+                limit(10^^xsd:decimal,
+                      select([v('Parent ID'),v('Commit ID'),v('Time'),v('Author'),v('Branch ID'),v('Message')],
+                             (t(v('Branch'),name,"main"^^xsd:string),
+                              t(v('Branch'),head,v('Active Commit ID')),
+                              path(v('Active Commit ID'),star(p(parent)),v('Parent'),v('Path')),
+                              t(v('Parent'),timestamp,v('Time')),
+                              (v('Time')<X^^xsd:decimal),
+                              t(v('Parent'),identifier,v('Commit ID')),
+                              t(v('Parent'),author,v('Author')),
+                              t(v('Parent'),message,v('Message')))))),
+
+    create_context(Descriptor, commit_info{ author : "test", message: "message2"},
+                   Context2),
+    query_response:run_context_ast_jsonld_response(Context2, AST, Response),
+    [Binding] = (Response.bindings),
+    (Binding.'Author'.'@value' = "test").
+
 :- end_tests(woql).
 
 :- begin_tests(store_load_data).
