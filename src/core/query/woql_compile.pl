@@ -4509,6 +4509,52 @@ test(less_than, [
     [Binding] = (Response.bindings),
     (Binding.'Author'.'@value' = "test").
 
+test(less_than_json, [
+         setup((setup_temp_store(State),
+                create_db_with_test_schema("admin", "test"))),
+         cleanup(teardown_temp_store(State))
+     ]) :-
+    resolve_absolute_string_descriptor("admin/test", Descriptor),
+
+    % This test will fail in 105,000 years.
+    Commit_Query = '{"@type": "Using", "collection": "_commits",
+      "query" : { "@type": "Limit", "limit": 10, "query": { "@type":
+      "Select", "variables": [ "Parent ID", "Commit ID", "Time",
+      "Author", "Branch ID", "Message" ], "query": { "@type": "And",
+      "and": [ { "@type": "Triple", "subject": { "@type": "NodeValue",
+      "variable": "Branch" }, "predicate": { "@type": "NodeValue",
+      "node": "name" }, "object": { "@type": "Value", "data": {
+      "@type": "xsd:string", "@value": "main" } } }, { "@type":
+      "Triple", "subject": { "@type": "NodeValue", "variable":
+      "Branch" }, "predicate": { "@type": "NodeValue", "node": "head"
+      }, "object": { "@type": "Value", "variable": "Active Commit ID"
+      } }, { "@type": "Path", "subject": { "@type": "NodeValue",
+      "variable": "Active Commit ID" }, "pattern": { "@type":
+      "PathStar", "star": { "@type": "PathPredicate", "predicate":
+      "parent" } }, "object": { "@type": "Value", "variable": "Parent"
+      }, "path": { "@type": "Value", "variable": "Path" } }, {
+      "@type": "Triple", "subject": { "@type": "NodeValue",
+      "variable": "Parent" }, "predicate": { "@type": "NodeValue",
+      "node": "timestamp" }, "object": { "@type": "Value", "variable":
+      "Time" } }, { "@type": "Less", "left": { "@type": "DataValue",
+      "variable": "Time" }, "right": { "@type": "DataValue", "data": {
+      "@type": "xsd:decimal", "@value": 3333630328286.951 } } }, {
+      "@type": "Triple", "subject": { "@type": "NodeValue",
+      "variable": "Parent" }, "predicate": { "@type": "NodeValue",
+      "node": "identifier" }, "object": { "@type": "Value",
+      "variable": "Commit ID" } }, { "@type": "Triple", "subject": {
+      "@type": "NodeValue", "variable": "Parent" }, "predicate": {
+      "@type": "NodeValue", "node": "author" }, "object": { "@type":
+      "Value", "variable": "Author" } }, { "@type": "Triple",
+      "subject": { "@type": "NodeValue", "variable": "Parent" },
+      "predicate": { "@type": "NodeValue", "node": "message" },
+      "object": { "@type": "Value", "variable": "Message" } } ] } }
+      }}',
+    atom_json_dict(Commit_Query, Query, []),
+    query_test_response(Descriptor, Query, Response),
+    [Binding] = (Response.bindings),
+    (Binding.'Author'.'@value' = "test").
+
 :- end_tests(woql).
 
 :- begin_tests(store_load_data).
