@@ -47,10 +47,22 @@ describe('document-get', function () {
     await db.del(agent, dbPath)
   })
 
-  function expectSchema (objects) {
+  function expectSchema (objects, params) {
+    params = new Params(params)
+    const prefix = params.boolean('prefixed') ? prefixes['@schema'] : ''
+    params.assertEmpty()
+
     expect(objects.length).to.equal(2)
     expect(objects[0]).to.deep.equal(prefixes)
-    expect(objects[1]).to.deep.equal(schema)
+
+    let schema2
+    if (prefix) {
+      schema2 = JSON.parse(JSON.stringify(schema))
+      schema2['@id'] = prefix + schema2['@id']
+    } else {
+      schema2 = schema
+    }
+    expect(objects[1]).to.deep.equal(schema2)
   }
 
   describe('returns expected schema stream', function () {
@@ -93,9 +105,13 @@ describe('document-get', function () {
 
   function expectInstances (objects, params) {
     params = new Params(params)
+    const prefixed = params.boolean('prefixed', false)
     const skip = params.integer('skip', 0)
     let count = params.integer('count', instances.length)
     params.assertEmpty()
+
+    const schemaPrefix = prefixed ? prefixes['@schema'] : ''
+    const basePrefix = prefixed ? prefixes['@base'] : ''
 
     if (count > instances.length - skip) {
       count = instances.length - skip
@@ -108,13 +124,15 @@ describe('document-get', function () {
     for (let i = 0; i < count; i++) {
       const object = objects[i]
       const expected = instances[i + skip]
-      expect(object['@type']).to.equal(expected['@type'])
+      expect(object['@type']).to.equal(schemaPrefix + expected['@type'])
       delete object['@type']
-      expect(object.name).to.equal(expected.name)
-      delete object.name
-      expect(object.age).to.equal(expected.age)
-      delete object.age
-      expect(object['@id']).to.equal('Person/' + expected.name)
+      const name = schemaPrefix + 'name'
+      expect(object[name]).to.equal(expected.name)
+      delete object[name]
+      const age = schemaPrefix + 'age'
+      expect(object[age]).to.equal(expected.age)
+      delete object[age]
+      expect(object['@id']).to.equal(basePrefix + 'Person/' + expected.name)
       delete object['@id']
       expect(Object.keys(object).length).to.equal(0)
     }
@@ -187,6 +205,39 @@ describe('document-get', function () {
           .get(agent, docPath, option)
           .then(document.verifyGetSuccess)
         expectInstances(r.body, params)
+      })
+    }
+  })
+
+  describe('returns expected prefixed', function () {
+    const options = [
+      { query: { graph_type: 'schema', as_list: true, prefixed: true } },
+      { body: { graph_type: 'schema', as_list: true, prefixed: true } },
+      { query: { graph_type: 'instance', as_list: true, prefixed: true } },
+      { body: { graph_type: 'instance', as_list: true, prefixed: true } },
+    ]
+    for (const option of options) {
+      it(JSON.stringify(option), async function () {
+        const graphType = option.query
+          ? option.query.graph_type
+          : option.body ? option.body.graph_type : false
+        // FIXME! Schemas documents are not prefixed. What should we do?
+        if (graphType === 'schema') {
+          this.skip()
+        }
+        const r = await document
+          .get(agent, docPath, option)
+          .then(document.verifyGetSuccess)
+        switch (graphType) {
+          case 'schema':
+            expectSchema(r.body, { prefixed: true })
+            break
+          case 'instance':
+            expectInstances(r.body, { prefixed: true })
+            break
+          default:
+            throw new Error(`Unexpected 'graphType': ${graphType}`)
+        }
       })
     }
   })
