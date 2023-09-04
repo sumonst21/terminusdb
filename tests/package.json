@@ -24,7 +24,7 @@
   "homepage": "https://github.com/terminusdb/terminusdb/tree/main/tests",
   "dependencies": {
     "chai": "^4.3.4",
-    "mocha": "^9.1.2",
+    "mocha": "^9.2.2",
     "stream-json": "^1.7.3",
     "superagent": "^6.1.0"
   }
